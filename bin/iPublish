@@ -1,0 +1,97 @@
+#!/usr/bin/perl -w
+use strict;
+use warnings;
+BEGIN{
+    push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
+}
+use Net::OpenSSH;
+use Term::ANSIColor;
+
+my $num = scalar(@ARGV);
+
+if($num == 1){
+    if($ARGV[0] eq "-h" || $ARGV[0] eq "--help"){
+        &show_help;
+    }
+    if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
+        &show_projects;
+    }
+}elsif($num == 3) {
+    if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
+            && ($ARGV[2] eq "-l" || $ARGV[2] eq "--list") )
+    {
+        my $project_name = $ARGV[1];
+        &list_versions($project_name)
+    }
+}elsif($num == 4){
+    if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
+            && ($ARGV[2] eq "-v" || $ARGV[2] eq "--version") )
+    {
+        my $project_name = $ARGV[1];
+        my $version = $ARGV[3];
+        &publish_version($project_name, $version);
+    }
+}else {
+    &show_help;
+}
+
+sub publish_version{
+    my ($project_name, $version) = @_;
+    my $host = "bj\@joinjoy.me:";
+    my %params = (
+        user => 'bj'
+    );
+    my $dir = "/home/bj/www/";
+    my @args = ("scp", "-r", "/tmp/test", $host.$dir.$project_name."/".$version);
+    my $out = system(@args);
+    if ($out == 0){
+        print color("green");
+        print "Publish successful.\n";
+    } else {
+        print color("red");
+        print "Publish fail.\n";
+    }
+    print color("reset");
+}
+
+sub list_versions{
+    my ($project_name) = @_;
+    my $host = "joinjoy.me";
+    my %params = (
+        user => 'bj'
+    );
+    my $dir = "/home/bj/www/";
+    my $ssh = Net::OpenSSH->new($host, %params);
+    my $cmd = "ls -l $dir".$project_name;
+    my @out = $ssh->capture( $cmd );
+    shift @out;
+    print color("yellow");
+    foreach (@out) {
+        my @line = split(' ', $_);   
+        print pop(@line);
+        print "\n";
+    }
+    print color("reset");
+}
+
+#sub show_projects {
+#    # bugs to fix
+#    foreach (@projects){
+#        print "Project : $_[0]\n";
+#        print "\tSource Directory : $_[1]\n";
+#        foreach ($_[3]){
+#            print "\tServers Address : $_[0]\n";
+#        }
+#        print "\tDest Directory : $_[2]\n";
+#    }
+#}
+
+sub show_help {
+    print "Usage : iPublish\n";
+    print "\t-h | --help : show help info\n";
+    print "\t-l | --list : show all projects you have add to iPublish\n";
+    print "\t-p | --project [name] -l | --list : list all versions of your project\n";
+    print "\t-p | --project [name] -l | -v | --version [version] : publish a project of a 
+        \t\t certain version or a possible version based on date(2013_05_01)\n";
+}
+
