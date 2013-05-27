@@ -1,12 +1,19 @@
-#!/usr/bin/perl
-use strict;
+project {
+    name demo;
+    source_dir /tmp/demo;
+    dest_dir /home/www/projects/demo;
+    server {
+        host joinjoy.me;
+        user bj;
+    }
+}
 
-package conf;
-my @projects = (
-    ["demo","/tmp/projects","/home/www/demo",["127.0.0.1","root","root"],["127.0.0.1","root","root"]],
-    ["demo2","/tmp/projects","/home/www/demo2",["127.0.0.1","root","root"],["127.0.0.1","root","root"]],
-);
-
-
-
-
+project {
+    name demo2;
+    source_dir /tmp/demo2;
+    dest_dir /home/www/projects/demo2;
+    server {
+        host joinjoy.me;
+        user bj;
+    }
+}
