@@ -7,6 +7,53 @@ BEGIN {
 use Net::OpenSSH;
 use Term::ANSIColor;
 
+my %conf = ();
+sub load_conf {
+    if(open(CONF, "../.iPublish")) {
+        my $mutex = -1;
+        my $project_name = "";
+        while<CONF> {
+            if($_ =~ m/\s.*project\s.*\{\s.*/i) {
+                #project begin
+                $mutex++;
+            }
+            if(m/\s.*name\s.*(\w+);\s.*/) {
+                #project name $1
+                $project_name = $1;
+            }
+            if(m/\s.*source_dir\s.*(\/\w+)+;\s.*/) {
+                #source dir $1
+                $conf{ $project_name.'_src' } = $1;
+            }
+            if(m/\s.*dest_dir\s.*(\/\w+)+;\s.*/) {
+                #dest dir $1
+                $conf{ $project_name.'_dest' } = $1;
+            }
+            if(m/\s.*server\s.*\{\s.*/) {
+                #server begin
+                $mutex++;
+            }
+            if(m/\s.*host\s.*(\w+(\w.*\.\w.*)\w+);\s.*/) {
+                #one host address $1
+            }
+            if(m/\s.*user\s.*(\w+);\s.*/) {
+                # host user name $1
+            }
+            if(m/\s.*\}\s.*/ && $mutex == 1) {
+                $mutex--;
+            }
+            if(m/\s.*\}\s.*/ && $mutex == 0){
+                $mutex--;
+            }
+        }
+    } else {
+        print color("red");
+        print "Can not read config file.\n";
+        print color("reset");
+        exit;
+    }  
+}
+
 my $num = scalar(@ARGV);
 
 if($num == 1) {
@@ -33,10 +80,6 @@ if($num == 1) {
     }
 } else {
     &show_help;
-}
-
-sub load_conf {
-    
 }
 
 sub publish_version {
@@ -79,24 +122,7 @@ sub list_versions {
 }
 
 sub show_projects {
-    if(open(CONF, "../.iPublish")) {
-        while<CONF> {
-            if($_ =~ m/name\ (\w)/) {
-                print "ProjectName:\t$1\n";
-            }
-            if($_ =~ m/source_dir\ (\w)/) {
-                print "SourceDirectory:\t$1\n";
-            }
-            if($_ =~ m/\}/) {
-                print "\n";
-            }
-        }
-    } else {
-        print color("red");
-        print "Can not read config file.\n";
-        print color("reset");
-        exit;
-    }
+    
 }
 
 sub show_help {
