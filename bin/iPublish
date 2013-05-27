@@ -36,7 +36,7 @@ if($num == 1) {
 }
 
 sub load_conf {
-    ##To DO....
+    
 }
 
 sub publish_version {
@@ -79,7 +79,24 @@ sub list_versions {
 }
 
 sub show_projects {
-    ##TO DO....
+    if(open(CONF, "../.iPublish")) {
+        while<CONF> {
+            if($_ =~ m/name\ (\w)/) {
+                print "ProjectName:\t$1\n";
+            }
+            if($_ =~ m/source_dir\ (\w)/) {
+                print "SourceDirectory:\t$1\n";
+            }
+            if($_ =~ m/\}/) {
+                print "\n";
+            }
+        }
+    } else {
+        print color("red");
+        print "Can not read config file.\n";
+        print color("reset");
+        exit;
+    }
 }
 
 sub show_help {
