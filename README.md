@@ -8,14 +8,16 @@ perl modules in your computer.
 ### Introduction
 
 * Data Structure to save conf
+
 ```perl
-    $conf{"project_name"} = {
-        "name" => $name,
-        "source_dir" => $src,
-        "dest_dir" => $dest,
-        "servers" => [{"host" => $host, "user" => $user },
-                {"host" => $host, "user" => $user}],
-    };
+#!/usr/bin/perl -w
+$conf{"project_name"} = {
+    "name" => $name,
+    "source_dir" => $src,
+    "dest_dir" => $dest,
+    "servers" => [{"host" => $host, "user" => $user },
+            {"host" => $host, "user" => $user}],
+};
 ```
 
 ### Install
