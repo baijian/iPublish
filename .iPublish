@@ -6,6 +6,10 @@ project {
         host joinjoy.me;
         user bj;
     }
+    server {
+        host join2joy.me;
+        user bj;
+    }
 }
 
 project {
@@ -13,7 +17,7 @@ project {
     source_dir /tmp/demo2;
     dest_dir /home/www/projects/demo2;
     server {
-        host joinjoy.me;
+        host join3joy.me;
         user bj;
     }
 }
