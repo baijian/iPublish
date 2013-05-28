@@ -6,13 +6,23 @@ perl modules in your computer.
 ## iPublish
 
 ### Introduction
-```text
 
+* Data Structure to save conf
+```perl
+    $conf{"project_name"} = {
+        "name" => $name,
+        "source_dir" => $src,
+        "dest_dir" => $dest,
+        "servers" => [{"host" => $host, "user" => $user },
+                {"host" => $host, "user" => $user}],
+    };
 ```
 
 ### Install
 sudo cpan 
+
 install IO::Pty
+
 install Net::OpenSSH
 
 cp bin/iPublish to your $HOME/bin directory, cp .iPublish config file
@@ -43,7 +53,7 @@ iPublish [-p | --project] name [-v | --version] [version]
 ### Example
 ```
 * 1.Write config in .iPublish for your projects
-* 2.To see help info of iPublish command```iPublish -h```.
+* 2.To see help info of iPublish command ```iPublish -h```.
 * 3.iPublish [--list list all projects in .iPublish]  
             [-p project] [[-l list all versions] | [-v version]]
 ```
