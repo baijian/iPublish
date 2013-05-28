@@ -7,6 +7,30 @@ perl modules in your computer.
 
 ### Introduction
 
+* Config file example
+
+```text
+project {
+    name demo;
+    source_dir /tmp/demo;
+    dest_dir /home/www/projects/demo;
+    server {
+        host joinjoy.me;
+        user bj;
+    }
+}
+
+project {
+    name demo2;
+    source_dir /tmp/demo2;
+    dest_dir /home/www/projects/demo2;
+    server {
+        host joinjoy.me;
+        user bj;
+    }
+}
+```
+
 * Data Structure to save conf
 
 ```perl
