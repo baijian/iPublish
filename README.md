@@ -1,13 +1,28 @@
-Some automated scripts writen in perl
+iPublish
 ============
-modules-list is a perl script to list all the installed
-perl modules in your computer.
 
-## iPublish
+## Introduction
+iPublish is a small program writen in perl to help you
+publish projects to your production servers. We aim to 
+make publish operation easier and faster when you have 
+many projects to manage.
 
-### Introduction
+## Install
 
-* Config file example
+* Install perl dependencies
+```text
+sudo cpan 
+install IO::Pty
+install Net::OpenSSH
+```
+
+* Install iPublish commands
+
+Just cp bin/* to your $HOME/bin directory, ofcourse you must 
+have add your $HOME/bin PATH to your PATH. Then you can use 
+iPublish as your linux commands.
+
+## Configuration
 
 ```text
 project {
@@ -16,6 +31,10 @@ project {
     dest_dir /home/www/projects/demo;
     server {
         host joinjoy.me;
+        user bj;
+    }
+    server {
+        host joinjoy2.me;
         user bj;
     }
 }
@@ -31,32 +50,7 @@ project {
 }
 ```
 
-* Data Structure to save conf
-
-Hash of hash
-```perl
-$conf{"project_name"}{"name"} = "demo";
-$conf{"project_name"}{"source_dir"} = "";
-$conf{"project_name"}{"dest_dir"} = "";
-```
-Hash of array of hash
-```perl
-$servers{"project_name"}[$i]{"host"} = "joinjoy.me";
-$servers{"project_name"}[$i]{"user"} = "bj";
-```
-
-### Install
-sudo cpan 
-
-install IO::Pty
-
-install Net::OpenSSH
-
-cp bin/iPublish to your $HOME/bin directory, cp .iPublish config file
-to your $HOME directory. Ofcourse you must have add your $HOME/bin 
-to your PATH variable. Then you can use iPublish as your linux command.
-
-### Command help
+## Command help
 Show help info 
 ```text
 iPublish -h | --help
@@ -77,13 +71,30 @@ Publish a project
 iPublish [-p | --project] name [-v | --version] [version]
 ```
 
-### Example
-```
-* 1.Write config in .iPublish for your projects
-* 2.To see help info of iPublish command ```iPublish -h```.
-* 3.iPublish [--list list all projects in .iPublish]  
-            [-p project] [[-l list all versions] | [-v version]]
+## Others
+
+### Data Structure to save conf
+
+* Hash of hash
+```perl
+$conf{"project_name"}{"name"} = "demo";
+$conf{"project_name"}{"source_dir"} = "";
+$conf{"project_name"}{"dest_dir"} = "";
 ```
 
-##
+* Hash of array of hash
+```perl
+$servers{"project_name"}[$i]{"host"} = "joinjoy.me";
+$servers{"project_name"}[$i]{"user"} = "bj";
+```
+
+### Use Example
+```
+* 1.Write config in .iPublish for your projects
+* 2.To see help info of iPublish command 
+    ``` iPublish -h ```.
+* 3.iPublish -p <name> -v <version> 
+* 4.iPublish -p -l
+```
+
 
