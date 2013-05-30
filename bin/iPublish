@@ -7,73 +7,8 @@ BEGIN {
 use Net::OpenSSH;
 use Term::ANSIColor;
 
-my %confs = ();
-sub load_conf {
-    if(open(CONF, ".iPublish")) {
-        my $mutex = -1;
-        my $conf = {};
-        my @servers;
-        my $server = {};
-        my $project_name = "";
-        while(<CONF>) {
-            if($_ =~ m/\s*project\s*\{\s*/i) {
-                #project begin
-                $mutex++;
-            } elsif(m/\s*name\s*(\w+);\s*/) {
-                #project name $1
-                $project_name = $1;
-            } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/) {
-                #source dir $1
-                $conf->{ "source_dir" } = $1; 
-            } elsif(m/\s*dest_dir\s*((\/\w+)+);\s*/) {
-                #dest dir $1
-                $conf->{ "dest_dir" } = $1;
-            } elsif(m/\s*server\s*\{\s*/) {
-                #server begin
-                $mutex++;
-            } elsif(m/\s*host\s*(\w+(\w*\.\w*)\w+);\s*/) {
-                #one host address $1
-                $server->{ 'host' } = $1;
-            } elsif(m/\s*user\s*(\w+);\s*/) {
-                # host user name $1
-                $server->{ 'user' } = $1;
-            } elsif(m/\s*\}\s*/ && $mutex == 1) {
-                # server end
-                my $server_ref_copy = $server;
-                push (@servers, $server_ref_copy);
-                $mutex--;
-            } elsif(m/(\s*\}\s*)/ && $mutex == 0) {
-                # project end
-                my @server_list_copy = @servers;
-                @servers = ();
-                $conf->{ "servers" } = \@server_list_copy;
-                my $conf_ref_copy = $conf;
-                $confs{ $project_name } = $conf_ref_copy;
-                $mutex--;
-            }
-        }
-    } else {
-        print color("red");
-        print "Can not read config file.\n";
-        print "Error:$!\n";
-        print color("reset");
-        exit;
-    }  
-    close CONF;
-}
-&load_conf;
-foreach my $project_name ( keys %confs) {
-    print $project_name."\n";
-    print "\t".$confs{ "$project_name" }->{ "source_dir" }."\n";
-    print "\t".$confs{ "$project_name" }->{ "dest_dir" }."\n";
-    print "\tServers:\n";
-    foreach (@{$confs{ "$project_name" }->{ "servers" }}) {
-        print "\t\t".$_->{ "host" }."\n";
-        print "\t\t".$_->{ "user" }."\n";
-    }
-}
-exit;
-
+my %confs;
+my %servers;
 my $num = scalar(@ARGV);
 
 if($num == 1) {
@@ -81,7 +16,7 @@ if($num == 1) {
         &show_help;
     }
     if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
-        &show_projects;
+        &list_projects;
     }
 } elsif($num == 3) {
     if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
@@ -141,8 +76,68 @@ sub list_versions {
     print color("reset");
 }
 
-sub show_projects {
-    
+sub load_conf {
+    if(open(CONF, ".iPublish")) {
+        my $mutex = -1;
+         #my $conf = {};
+         #my @servers;
+         #my $server = {};
+        my $project_name;
+        my $i = 0;
+        while(<CONF>) {
+            if($_ =~ m/\s*project\s*\{\s*/i) {
+                #project begin
+                $mutex++;
+            } elsif(m/\s*name\s*(\w+);\s*/) {
+                #project name $1
+                $project_name = $1;
+            } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/) {
+                #source dir $1
+                $confs{"$project_name"}{ "source_dir" } = $1; 
+            } elsif(m/\s*dest_dir\s*((\/\w+)+);\s*/) {
+                #dest dir $1
+                $confs{"$project_name"}{ "dest_dir" } = $1;
+            } elsif(m/\s*server\s*\{\s*/) {
+                #server begin
+                $mutex++;
+            } elsif(m/\s*host\s*(\w+(\w*\.\w*)\w+);\s*/) {
+                #one host address $1
+                $servers{"$project_name"}[$i]{ 'host' } = $1;
+            } elsif(m/\s*user\s*(\w+);\s*/) {
+                # host user name $1
+                $servers{"$project_name"}[$i]{ 'user' } = $1;
+            } elsif(m/\s*\}\s*/ && $mutex == 1) {
+                # server end
+                $i++;
+                $mutex--;
+            } elsif(m/(\s*\}\s*)/ && $mutex == 0) {
+                # project end
+                $mutex--;
+                $i = 0;
+            }
+        }
+    } else {
+        print color("red");
+        print "Can not read config file.\n";
+        print "Error:$!\n";
+        print color("reset");
+        exit;
+    }  
+    close CONF;
+}
+
+sub list_projects {
+    &load_conf;
+    foreach my $project_name ( keys %confs) {
+        print $project_name."\n";
+        print "\t".$confs{ "$project_name" }->{ "source_dir" }."\n";
+        print "\t".$confs{ "$project_name" }->{ "dest_dir" }."\n";
+        print "\tServers:\n";
+        foreach (@{$servers{ "$project_name" }}) {
+            print "\t\t".$_->{ "host" }."\n";
+            print "\t\t".$_->{ "user" }."\n";
+        }
+    }   
 }
 
 sub show_help {

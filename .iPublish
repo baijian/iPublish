@@ -1,4 +1,13 @@
 project {
+    name demo2;
+    source_dir /tmp/demo2;
+    dest_dir /home/www/projects/demo2;
+    server {
+        host join3joy.me;
+        user bj;
+    }
+}
+project {
     name demo;
     source_dir /tmp/demo;
     dest_dir /home/www/projects/demo;
@@ -12,12 +21,3 @@ project {
     }
 }
 
-project {
-    name demo2;
-    source_dir /tmp/demo2;
-    dest_dir /home/www/projects/demo2;
-    server {
-        host join3joy.me;
-        user bj;
-    }
-}
