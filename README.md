@@ -33,15 +33,16 @@ project {
 
 * Data Structure to save conf
 
+Hash of hash
 ```perl
-#!/usr/bin/perl -w
-$conf{"project_name"} = {
-    "name" => $name,
-    "source_dir" => $src,
-    "dest_dir" => $dest,
-    "servers" => [{"host" => $host, "user" => $user },
-            {"host" => $host, "user" => $user}],
-};
+$conf{"project_name"}{"name"} = "demo";
+$conf{"project_name"}{"source_dir"} = "";
+$conf{"project_name"}{"dest_dir"} = "";
+```
+Hash of array of hash
+```perl
+$servers{"project_name"}[$i]{"host"} = "joinjoy.me";
+$servers{"project_name"}[$i]{"user"} = "bj";
 ```
 
 ### Install
