@@ -27,6 +27,7 @@ iPublish as your linux commands.
 ```text
 project {
     name demo;
+    version_file /home/www/RELEASE/demo;
     source_dir /tmp/demo;
     dest_dir /home/www/projects/demo;
     server {
@@ -41,6 +42,7 @@ project {
 
 project {
     name demo2;
+    version_file /home/www/RELEASE/demo2;
     source_dir /tmp/demo2;
     dest_dir /home/www/projects/demo2;
     server {
@@ -53,22 +55,27 @@ project {
 ## Command help
 Show help info 
 ```text
-iPublish -h | --help
+iPublish [-h | --help]
 ```
 
-List all projects that you have add to iPublish
+List config info of all projects that you have add to iPublish
 ```text
-iPublish -l | --list
+iPublish [-l | --list]
+```
+
+List config info of one project passed by you
+```text
+iPublish [-l | --list] [-p | --project] <name>
 ```
    
 List all versions of a project
 ```text
-iPublish [-p | --project] [name] [-l | --list]
+iPublish [-p | --project] <name> [-l | --list]
 ``` 
 
 Publish a project 
 ```text
-iPublish [-p | --project] name [-v | --version] [version]
+iPublish [-p | --project] <name> [-v | --version] <version>
 ```
 
 ## Others

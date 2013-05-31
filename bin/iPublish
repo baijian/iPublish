@@ -21,7 +21,11 @@ if($num == 1) {
         &show_help;
     }
 } elsif($num == 3) {
-    if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
+    if( ($ARGV[0] eq "-l" || $ARGV[0] eq "--list")
+            && ($ARGV[1] eq "-p" || $ARGV[1] eq "--project") ) 
+    {
+        &list_projects($ARGV[2]);
+    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
             && ($ARGV[2] eq "-l" || $ARGV[2] eq "--list") )
     {
         my $project_name = $ARGV[1];
@@ -108,8 +112,11 @@ sub load_conf {
                 #project name $1
                 $project_name = $1;
                 if(exists $confs{$1}) {
-                    push($errmsg, "Project $1 duplicated!");
+                    push(@errmsg, "Project $1 duplicated!");
                 }
+            } elsif(m/\s*version_file\s*((\/\w+)+);\s*/ && $mutex == 0) {
+                #version file location 
+                $confs{"$project_name"}{"version_file"} = $1;
             } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/ && $mutex == 0) {
                 #source dir $1
                 $confs{"$project_name"}{ "source_dir" } = $1; 
@@ -174,20 +181,24 @@ sub project_exist_check {
     }
 }
 
-
-
 sub list_projects {
+    my ($project) = @_;
     &load_conf;
-    foreach my $project_name ( keys %confs) {
-        print $project_name."\n";
-        print "\t".$confs{ "$project_name" }->{ "source_dir" }."\n";
-        print "\t".$confs{ "$project_name" }->{ "dest_dir" }."\n";
-        print "\tServers:\n";
-        foreach (@{$servers{ "$project_name" }}) {
-            print "\t\t".$_->{ "host" }."\n";
-            print "\t\t".$_->{ "user" }."\n";
-        }
-    }   
+    if(defined $project) {
+        &project_exist_check($project);
+    } else {
+        foreach my $project_name ( keys %confs) {
+            print $project_name."\n";
+            print "\t"."Src Directory: ".$confs{ "$project_name" }->{ "source_dir" }."\n";
+            print "\t"."Dest Directory: ".$confs{ "$project_name" }->{ "dest_dir" }."\n";
+            print "\t"."Version File: ".$confs{ "$project_name" }->{ "version_file" }."\n";
+            print "\tServers:\n";
+            foreach (@{$servers{ "$project_name" }}) {
+                print "\t\t"."HostAddress: ".$_->{ "host" }."\n";
+                print "\t\t"."HostUser: ".$_->{ "user" }."\n";
+            }
+        }   
+    }
 }
 
 sub show_help {
