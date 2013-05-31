@@ -9,6 +9,7 @@ use Term::ANSIColor;
 
 my %confs;
 my %servers;
+my @errmsg;
 my $num = scalar(@ARGV);
 
 if($num == 1) {
@@ -78,40 +79,41 @@ sub list_versions {
 
 sub load_conf {
     if(open(CONF, ".iPublish")) {
+        #begin to parser conf
         my $mutex = -1;
-         #my $conf = {};
-         #my @servers;
-         #my $server = {};
         my $project_name;
         my $i = 0;
         while(<CONF>) {
             if($_ =~ m/\s*project\s*\{\s*/i) {
-                #project begin
+                #project block enter
                 $mutex++;
-            } elsif(m/\s*name\s*(\w+);\s*/) {
+            } elsif(m/\s*name\s*(\w+);\s*/ && $mutex == 0) {
                 #project name $1
                 $project_name = $1;
-            } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/) {
+                if(exists $confs{$1}) {
+                    push($errmsg, "Project $1 duplicated!");
+                }
+            } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/ && $mutex == 0) {
                 #source dir $1
                 $confs{"$project_name"}{ "source_dir" } = $1; 
-            } elsif(m/\s*dest_dir\s*((\/\w+)+);\s*/) {
+            } elsif(m/\s*dest_dir\s*((\/\w+)+);\s*/ && $mutex == 0) {
                 #dest dir $1
                 $confs{"$project_name"}{ "dest_dir" } = $1;
-            } elsif(m/\s*server\s*\{\s*/) {
-                #server begin
+            } elsif(m/\s*server\s*\{\s*/ && $mutex == 0) {
+                #server block enter
                 $mutex++;
-            } elsif(m/\s*host\s*(\w+(\w*\.\w*)\w+);\s*/) {
+            } elsif(m/\s*host\s*(\w+(\w*\.\w*)\w+);\s*/ && $mutex == 1) {
                 #one host address $1
                 $servers{"$project_name"}[$i]{ 'host' } = $1;
-            } elsif(m/\s*user\s*(\w+);\s*/) {
+            } elsif(m/\s*user\s*(\w+);\s*/ && $mutex == 1) {
                 # host user name $1
                 $servers{"$project_name"}[$i]{ 'user' } = $1;
             } elsif(m/\s*\}\s*/ && $mutex == 1) {
-                # server end
+                # server block out
                 $i++;
                 $mutex--;
             } elsif(m/(\s*\}\s*)/ && $mutex == 0) {
-                # project end
+                # project block out
                 $mutex--;
                 $i = 0;
             }
@@ -124,6 +126,15 @@ sub load_conf {
         exit;
     }  
     close CONF;
+    if(scalar(@errmsg) > 0) {
+        for(@errmsg) {
+            print color("red");
+            print $_;
+            print "\n";
+        }
+        print color("reset");
+        exit;
+    }
 }
 
 sub list_projects {
