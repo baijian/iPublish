@@ -73,9 +73,19 @@ List all versions of a project
 iPublish [-p | --project] <name> [-l | --list]
 ``` 
 
+Query current version of a project
+```text
+iPublish [-p | --project] <name> [-cv]
+```
+
 Publish a project 
 ```text
 iPublish [-p | --project] <name> [-v | --version] <version>
+```
+
+Change to a new version of a project
+```text
+iPublish [-p | --project] <name> [-cv] <version>
 ```
 
 ## Others

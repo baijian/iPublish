@@ -30,6 +30,11 @@ if($num == 1) {
     {
         my $project_name = $ARGV[1];
         &list_versions($project_name)
+    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project")
+            && ($ARGV[2] eq "-cv") ) 
+    {
+        my $project_name = $ARGV[1];
+        &current_version($project_name);
     } else {
         &show_help;
     }
@@ -40,11 +45,66 @@ if($num == 1) {
         my $project_name = $ARGV[1];
         my $version = $ARGV[3];
         &publish_version($project_name, $version);
+    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
+            && ($ARGV[2] eq "-cv") ) 
+    {
+        my $project_name = $ARGV[1];
+        my $version = $ARGV[3];
+        &change_version($project_name, $version);
     } else {
         &show_help;
     }
 } else {
     &show_help;
+}
+
+sub current_version {
+    my ($project_name) = @_;
+    &load_conf;
+    &project_exist_check($project_name);
+    foreach(@{$servers{ "$project_name" }}) {
+        my $host = $_->{ "host" };
+        my %params = (
+            user => $_->{ "user" }
+        );
+        my $version_file = $confs{ "$project_name" }->{"version_file"};
+        my $ssh = Net::OpenSSH->new($host, %params);
+        my $cmd = "cat $version_file";
+        my @out = $ssh->capture( $cmd );
+        print color("yellow");
+        foreach (@out) {
+            my @line = split(' ', $_);   
+            print pop(@line);
+            print "\n";
+        }
+        print color("reset");
+        exit;
+    }
+}
+
+sub change_version {
+    my ($project_name, $new_version) = @_;
+    &load_conf;
+    &project_exist_check($project_name);
+    &version_exist_check($project_name, $new_version);
+    foreach(@{$servers{ "$project_name" }}) {
+        my $host = $_->{ "host" };
+        my %params = (
+            user => $_->{ "user" }
+        );
+        my $version_file = $confs{ "$project_name" }->{"version_file"};
+        my $ssh = Net::OpenSSH->new($host, %params);
+        my $cmd = "echo $new_version > $version_file";
+        my $out = $ssh->capture( $cmd );
+        if($out == 0) {
+            print color("green");
+            print "$host Change Version to $new_version Successful.";
+        } else {
+            print color("red");
+            print "$host Change Version to $new_version Failed!";
+        }
+    }
+    print color("reset");
 }
 
 sub publish_version {
@@ -179,6 +239,27 @@ sub project_exist_check {
             }
         }
     }
+}
+
+sub version_exist_check {
+    #check version exists in the project after project exists check
+    my ($project_name, $version) = @_;
+    my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
+    foreach(@{$servers{ "$project_name" }}) {
+        my $host = $_->{ "host" };
+        my %params = (
+            user => $_->{ "user" }
+        );
+        my $ssh = Net::OpenSSH->new($host, %params);
+        my $cmd = "ls $dest_dir"."/".$project_name."/".$new_version;
+        my $out = $ssh->capture( $cmd );
+        if($out != 0) {
+            print color("red");
+            print "$host does not exist version: $new_version. Please check.\n";
+            exit;
+        }
+    }
+    print color("reset");
 }
 
 sub list_projects {
