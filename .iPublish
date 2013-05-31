@@ -1,5 +1,6 @@
 project {
     name demo2;
+    version_file /home/www/RELEASE/DEMO2;
     source_dir /tmp/demo2;
     dest_dir /home/www/projects/demo2;
     server {
@@ -9,6 +10,7 @@ project {
 }
 project {
     name demo;
+    version_file /home/www/RELEASE/demo;
     source_dir /tmp/demo;
     dest_dir /home/www/projects/demo;
     server {
