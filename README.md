@@ -95,6 +95,7 @@ iPublish [-p | --project] <name> [-cv] <version>
 * Hash of hash
 ```perl
 $conf{"project_name"}{"name"} = "demo";
+$conf{"project_name"}{"version_file"} = "/home/www/RELEASE/DEMO";
 $conf{"project_name"}{"source_dir"} = "";
 $conf{"project_name"}{"dest_dir"} = "";
 ```
