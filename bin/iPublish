@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use warnings;
+# for mac egg ache
 BEGIN {
     push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
 }
@@ -12,6 +13,7 @@ my %servers;
 my @errmsg;
 my $num = scalar(@ARGV);
 
+#command params selection and handle
 if($num == 1) {
     if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
         &list_projects;
