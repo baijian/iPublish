@@ -13,11 +13,10 @@ my @errmsg;
 my $num = scalar(@ARGV);
 
 if($num == 1) {
-    if($ARGV[0] eq "-h" || $ARGV[0] eq "--help"){
-        &show_help;
-    }
     if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
         &list_projects;
+    } else {
+        &show_help;
     }
 } elsif($num == 3) {
     if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
@@ -25,6 +24,8 @@ if($num == 1) {
     {
         my $project_name = $ARGV[1];
         &list_versions($project_name)
+    } else {
+        &show_help;
     }
 } elsif($num == 4) {
     if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
@@ -33,6 +34,8 @@ if($num == 1) {
         my $project_name = $ARGV[1];
         my $version = $ARGV[3];
         &publish_version($project_name, $version);
+    } else {
+        &show_help;
     }
 } else {
     &show_help;
@@ -40,41 +43,53 @@ if($num == 1) {
 
 sub publish_version {
     my ($project_name, $version) = @_;
-    my $host = "bj\@joinjoy.me:";
-    my %params = (
-        user => 'bj'
-    );
-    my $dir = "/home/bj/www/";
-    my @args = ("scp", "-r", "/tmp/test", $host.$dir.$project_name."/".$version);
-    my $out = system(@args);
-    if ($out == 0) {
-        print color("green");
-        print "Publish successful.\n";
-    } else {
-        print color("red");
-        print "Publish fail.\n";
+    &load_conf;
+    &project_exist_check($project_name);
+    foreach(@{$servers{ "$project_name" }}) {
+        my $user = $_->{ "user" };
+        my $host = $_->{ "host" };
+        my $uhost = $user."\@".$host.":";
+        my %params = (
+            user => $_->{ "user" }
+        );
+        my $source_dir = $confs{"$project_name"}->{ "source_dir" };
+        my $dir = $confs{ "$project_name" }->{"dest_dir"};
+        my @args = ("scp", "-r", "$source_dir", $uhost.$dir.$project_name."/".$version);
+        my $out = system(@args);
+        if ($out == 0) {
+            print color("green");
+            print "Publish successful.\n";
+        } else {
+            print color("red");
+            print "Publish fail.\n";
+        }
+        print color("reset");
     }
-    print color("reset");
 }
 
 sub list_versions {
     my ($project_name) = @_;
-    my $host = "joinjoy.me";
-    my %params = (
-        user => 'bj'
-    );
-    my $dir = "/home/bj/www/";
-    my $ssh = Net::OpenSSH->new($host, %params);
-    my $cmd = "ls -l $dir".$project_name;
-    my @out = $ssh->capture( $cmd );
-    shift @out;
-    print color("yellow");
-    foreach (@out) {
-        my @line = split(' ', $_);   
-        print pop(@line);
-        print "\n";
+    &load_conf;
+    &project_exist_check($project_name);
+    #print versions of every server
+    foreach(@{$servers{ "$project_name" }}) {
+        my $host = $_->{ "host" };
+        my %params = (
+            user => $_->{ "user" }
+        );
+        my $dir = $confs{ "$project_name" }->{"dest_dir"};
+        my $ssh = Net::OpenSSH->new($host, %params);
+        my $cmd = "ls -l $dir".$project_name;
+        my @out = $ssh->capture( $cmd );
+        shift @out;
+        print color("yellow");
+        foreach (@out) {
+            my @line = split(' ', $_);   
+            print pop(@line);
+            print "\n";
+        }
+        print color("reset");
     }
-    print color("reset");
 }
 
 sub load_conf {
@@ -136,6 +151,28 @@ sub load_conf {
         exit;
     }
 }
+
+sub project_exist_check {
+    #check project if exists in iPublish
+    my ($project_name) = @_;
+    if(not exists $confs{"$project_name"}) {
+        print color("red");
+        print "You have not add project $project_name to iPublish!";
+        print "\n";
+        print color("reset");
+        exit;
+    } else {
+        #delete redundant project confs
+        foreach my $key (keys %confs) {
+            if($key ne $project_name){
+                delete $confs{$key};
+                delete $servers{$key};
+            }
+        }
+    }
+}
+
+
 
 sub list_projects {
     &load_conf;
