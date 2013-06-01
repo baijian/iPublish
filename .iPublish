@@ -1,10 +1,10 @@
 project {
     name demo;
-    version_file /home/www/RELEASE/DEMO;
+    version_file /home/bj/www/release/DEMO;
     source_dir /tmp/demo;
-    dest_dir /home/www/projects/demo2;
+    dest_dir /home/bj/www/demo/versions;
     server {
-        host joinjoy.me;
+        host 172.13.1.10;
         user bj;
     }
 }
@@ -18,7 +18,7 @@ project {
         user bj;
     }
     server {
-        host 192.168.0.110;
+        host 172.13.1.10;
         user bj;
     }
 }

@@ -123,11 +123,11 @@ sub servers_version_check {
     }
 }
 
+#publish a version to every server, check exists one by one.
 sub publish_version {
     my ($project_name, $version) = @_;
     &load_conf;
     &project_exist_check($project_name);
-    &servers_version_check($project_name, $version);
     foreach(@{$servers{ "$project_name" }}) {
         my $user = $_->{ "user" };
         my $host = $_->{ "host" };
@@ -137,17 +137,34 @@ sub publish_version {
         );
         my $source_dir = $confs{"$project_name"}->{ "source_dir" };
         my $dir = $confs{ "$project_name" }->{"dest_dir"};
-        my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version);
+        &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
+        open my $oldout, ">&", \*STDOUT or die "error";
+        open STDOUT, '>', '/tmp/out.txt' or die "error";
+        my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version."/");
         my $out = system(@args);
+        open STDOUT, ">&", $oldout;
         if ($out == 0) {
             print color("green");
             print $host." publish successful.\n";
         } else {
             print color("red");
-            print $host."Publish fail.\n";
+            print $host." publish fail.\n";
         }
         print color("reset");
     }
+}
+
+sub add_server_version {
+    my ($project_name, $host, $user, $dest_dir, $version) = @_;
+    my $ssh = &connect_server($host, $user);
+    my @args = ("mkdir", $dest_dir."/".$version);
+    my $out = $ssh->system(@args);
+}
+
+sub connect_server {
+    my ($host, $user) = @_;
+    my $ssh = Net::OpenSSH->new($host, (user=>$user));
+    return $ssh;
 }
 
 sub list_versions {
@@ -278,7 +295,7 @@ sub all_versions_exist_check {
 
 #check one version exists in one server of one project
 sub server_version_check {
-    my ($project_name, $host, $version);
+    my ($project_name, $host, $version) = @_;
     my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
     my $user;
     foreach(@{$servers{ "$project_name" }}) {
