@@ -10,6 +10,7 @@ use Term::ANSIColor;
 
 my %confs;
 my %servers;
+my %versions;
 my @errmsg;
 my $num = scalar(@ARGV);
 
@@ -86,7 +87,7 @@ sub change_version {
     my ($project_name, $new_version) = @_;
     &load_conf;
     &project_exist_check($project_name);
-    &version_exist_check($project_name, $new_version);
+    &all_versions_exist_check($project_name, $new_version);
     foreach(@{$servers{ "$project_name" }}) {
         my $host = $_->{ "host" };
         my %params = (
@@ -107,10 +108,20 @@ sub change_version {
     print color("reset");
 }
 
+sub servers_version_check {
+    # check if the version are exists in all servers of a project
+    my ($project_name, $version) = @_;
+    foreach(@{$servers{ "$project_name" }}) {
+        #TO DO...
+        &server_version_check
+    }
+}
+
 sub publish_version {
     my ($project_name, $version) = @_;
     &load_conf;
     &project_exist_check($project_name);
+    &servers_version_check($project_name, $version);
     foreach(@{$servers{ "$project_name" }}) {
         my $user = $_->{ "user" };
         my $host = $_->{ "host" };
@@ -241,25 +252,42 @@ sub project_exist_check {
     }
 }
 
-sub version_exist_check {
+sub all_versions_exist_check {
     #check version exists in the project after project exists check
     my ($project_name, $version) = @_;
     my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
     foreach(@{$servers{ "$project_name" }}) {
         my $host = $_->{ "host" };
-        my %params = (
-            user => $_->{ "user" }
-        );
-        my $ssh = Net::OpenSSH->new($host, %params);
-        my $cmd = "ls $dest_dir"."/".$project_name."/".$new_version;
-        my $out = $ssh->capture( $cmd );
-        if($out != 0) {
+        $res = &server_version_exist_check($project_name, $host, $version);
+        if(not defined $res) {
             print color("red");
-            print "$host does not exist version: $new_version. Please check.\n";
+            print "$host does not exist version: $version. Please check.\n";
+            print color("resest");
             exit;
+        } 
+    }
+}
+
+sub server_version_exist_check {
+    my ($project_name, $host, $version);
+    my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
+    my $user;
+    foreach(@{$servers{ "$project_name" }}) {
+        if($_->{ "host" } eq $host) {
+            $user = $_->{ "user" };
         }
     }
-    print color("reset");
+    my %params = (
+        user => $user;
+    );
+    my $ssh = Net::OpenSSH->new($host, %params);
+    my $cmd = "ls $dest_dir"."/".$project_name."/".$version;
+    my $out = $ssh->capture( $cmd );
+    if($out == 0) {
+        return 1;
+    } else {
+        return undef;
+    }
 }
 
 sub list_projects {
