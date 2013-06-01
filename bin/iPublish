@@ -111,9 +111,15 @@ sub change_version {
 sub servers_version_check {
     # check if the version are exists in all servers of a project
     my ($project_name, $version) = @_;
+    my $res;
     foreach(@{$servers{ "$project_name" }}) {
-        #TO DO...
-        &server_version_check
+        $res = &server_version_check($project_name, $_->{ "host" }, $version);
+        if($res) {
+            print color("red");;
+            print "$version does not exists in".$_->{ "host" }."\n";
+            print color("reset");
+            exit;
+        }
     }
 }
 
@@ -131,14 +137,14 @@ sub publish_version {
         );
         my $source_dir = $confs{"$project_name"}->{ "source_dir" };
         my $dir = $confs{ "$project_name" }->{"dest_dir"};
-        my @args = ("scp", "-r", "$source_dir", $uhost.$dir.$project_name."/".$version);
+        my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version);
         my $out = system(@args);
         if ($out == 0) {
             print color("green");
-            print "Publish successful.\n";
+            print $host." publish successful.\n";
         } else {
             print color("red");
-            print "Publish fail.\n";
+            print $host."Publish fail.\n";
         }
         print color("reset");
     }
@@ -148,7 +154,7 @@ sub list_versions {
     my ($project_name) = @_;
     &load_conf;
     &project_exist_check($project_name);
-    #print versions of every server
+    #print versions of one server(use iPublish default every servers' versions are same)
     foreach(@{$servers{ "$project_name" }}) {
         my $host = $_->{ "host" };
         my %params = (
@@ -156,7 +162,7 @@ sub list_versions {
         );
         my $dir = $confs{ "$project_name" }->{"dest_dir"};
         my $ssh = Net::OpenSSH->new($host, %params);
-        my $cmd = "ls -l $dir".$project_name;
+        my $cmd = "ls -l $dir";
         my @out = $ssh->capture( $cmd );
         shift @out;
         print color("yellow");
@@ -166,6 +172,7 @@ sub list_versions {
             print "\n";
         }
         print color("reset");
+        exit;
     }
 }
 
@@ -232,6 +239,7 @@ sub load_conf {
     }
 }
 
+#check if a project conf exists in iPublish
 sub project_exist_check {
     #check project if exists in iPublish
     my ($project_name) = @_;
@@ -268,7 +276,8 @@ sub all_versions_exist_check {
     }
 }
 
-sub server_version_exist_check {
+#check one version exists in one server of one project
+sub server_version_check {
     my ($project_name, $host, $version);
     my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
     my $user;
@@ -281,15 +290,12 @@ sub server_version_exist_check {
         user => $user;
     );
     my $ssh = Net::OpenSSH->new($host, %params);
-    my $cmd = "ls $dest_dir"."/".$project_name."/".$version;
-    my $out = $ssh->capture( $cmd );
-    if($out == 0) {
-        return 1;
-    } else {
-        return undef;
-    }
+    my $cmd = "ls $dest_dir"."/".$version;
+    my $res = $ssh->system($cmd);
+    return $res;
 }
 
+#list all projects confs have added to iPublish
 sub list_projects {
     my ($project) = @_;
     &load_conf;
