@@ -1,18 +1,18 @@
 project {
-    name demo2;
-    version_file /home/www/RELEASE/DEMO2;
-    source_dir /tmp/demo2;
+    name demo;
+    version_file /home/www/RELEASE/DEMO;
+    source_dir /tmp/demo;
     dest_dir /home/www/projects/demo2;
     server {
-        host join3joy.me;
+        host joinjoy.me;
         user bj;
     }
 }
 project {
-    name demo;
-    version_file /home/www/RELEASE/demo;
-    source_dir /tmp/demo;
-    dest_dir /home/www/projects/demo;
+    name demo2;
+    version_file /home/www/release/DEMO2;
+    source_dir /tmp/demo2;
+    dest_dir /home/www/projects/demo2;
     server {
         host joinjoy.me;
         user bj;
@@ -22,4 +22,3 @@ project {
         user bj;
     }
 }
-

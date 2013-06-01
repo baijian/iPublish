@@ -58,7 +58,7 @@ Show help info
 iPublish [-h | --help]
 ```
 
-List config info of all projects that you have add to iPublish
+List config info of all projects that you have added to iPublish
 ```text
 iPublish [-l | --list]
 ```

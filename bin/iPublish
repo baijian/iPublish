@@ -204,7 +204,7 @@ sub load_conf {
             } elsif(m/\s*server\s*\{\s*/ && $mutex == 0) {
                 #server block enter
                 $mutex++;
-            } elsif(m/\s*host\s*(\w+(\w*\.\w*)\w+);\s*/ && $mutex == 1) {
+            } elsif(m/\s*host\s*(\w+(\.\w+)+);\s*/ && $mutex == 1) {
                 #one host address $1
                 $servers{"$project_name"}[$i]{ 'host' } = $1;
             } elsif(m/\s*user\s*(\w+);\s*/ && $mutex == 1) {
@@ -266,7 +266,7 @@ sub all_versions_exist_check {
     my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
     foreach(@{$servers{ "$project_name" }}) {
         my $host = $_->{ "host" };
-        $res = &server_version_exist_check($project_name, $host, $version);
+        my $res = &server_version_exist_check($project_name, $host, $version);
         if(not defined $res) {
             print color("red");
             print "$host does not exist version: $version. Please check.\n";
@@ -287,7 +287,7 @@ sub server_version_check {
         }
     }
     my %params = (
-        user => $user;
+        user => $user
     );
     my $ssh = Net::OpenSSH->new($host, %params);
     my $cmd = "ls $dest_dir"."/".$version;
@@ -301,6 +301,15 @@ sub list_projects {
     &load_conf;
     if(defined $project) {
         &project_exist_check($project);
+        print $project."\n";
+        print "\tSrc Directory: ".$confs{ "$project" }->{ "source_dir" }."\n";
+        print "\t"."Dest Directory: ".$confs{ "$project" }->{ "dest_dir" }."\n";
+        print "\t"."Version File: ".$confs{ "$project" }->{ "version_file" }."\n";
+        print "\tServers:\n";
+        foreach (@{$servers{ "$project" }}) {
+            print "\t\t"."HostAddress: ".$_->{ "host" }."\n";
+            print "\t\t"."HostUser: ".$_->{ "user" }."\n";
+        }
     } else {
         foreach my $project_name ( keys %confs) {
             print $project_name."\n";
@@ -318,9 +327,12 @@ sub list_projects {
 
 sub show_help {
     print "Usage : iPublish\n";
-    print "\t-h | --help : show help info\n";
-    print "\t-l | --list : show all projects you have add to iPublish\n";
-    print "\t-p | --project [name] -l | --list : list all versions of your project\n";
-    print "\t-p | --project [name] -l | -v | --version [version] : publish a project of a 
-        \t\t certain version or a possible version based on date(2013_05_01)\n";
+    print "\t[-h | --help] : show help info\n";
+    print "\t[-l | --list] : show all projects you have add to iPublish\n";
+    print "\t[-l | --list] [-p | --project] <name> : show config info of one project\n";
+    print "\t[-p | --project] <name> [-l | --list] : list all versions of your project\n";
+    print "\t[-p | --project] <name> -cv : show current version of your project\n";
+    print "\t[-p | --project] <name> [-v | --version] <version> : publish a project of a 
+        \t\t certain version\n";
+    print "\t[-p | --project] <name> -cv <version> : change to new version\n";
 }
