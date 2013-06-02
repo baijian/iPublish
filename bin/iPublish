@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use warnings;
-# for mac egg ache
+# for my develop environment on mac => egg ache
 BEGIN {
     push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
 }
@@ -17,6 +17,7 @@ my $num = scalar(@ARGV);
 #command params selection and handle
 if($num == 1) {
     if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
+        #list all projects' conf
         &list_projects;
     } else {
         &show_help;
@@ -25,17 +26,18 @@ if($num == 1) {
     if( ($ARGV[0] eq "-l" || $ARGV[0] eq "--list")
             && ($ARGV[1] eq "-p" || $ARGV[1] eq "--project") ) 
     {
+        #list conf of one project
         &list_projects($ARGV[2]);
     } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
             && ($ARGV[2] eq "-l" || $ARGV[2] eq "--list") )
     {
-        my $project_name = $ARGV[1];
-        &list_versions($project_name)
+        #list project's all versions
+        &list_versions($ARGV[1]);
     } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project")
             && ($ARGV[2] eq "-cv") ) 
     {
-        my $project_name = $ARGV[1];
-        &current_version($project_name);
+        #list project's current version
+        &current_version($ARGV[1]);
     } else {
         &show_help;
     }
@@ -43,15 +45,13 @@ if($num == 1) {
     if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
             && ($ARGV[2] eq "-v" || $ARGV[2] eq "--version") )
     {
-        my $project_name = $ARGV[1];
-        my $version = $ARGV[3];
-        &publish_version($project_name, $version);
+        #publish a new version for a project
+        &publish_version($ARGV[1], $ARGV[3]);
     } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
             && ($ARGV[2] eq "-cv") ) 
     {
-        my $project_name = $ARGV[1];
-        my $version = $ARGV[3];
-        &change_version($project_name, $version);
+        #convert into a new version for a project
+        &change_version($ARGV[1], $ARGV[3]);
     } else {
         &show_help;
     }
@@ -71,14 +71,19 @@ sub current_version {
         my $version_file = $confs{ "$project_name" }->{"version_file"};
         my $ssh = Net::OpenSSH->new($host, %params);
         my $cmd = "cat $version_file";
+        open my $oldout, ">&", \*STDERR or die "error";
+        open STDERR, '>', '/dev/null' or die "error";
         my @out = $ssh->capture( $cmd );
-        print color("yellow");
-        foreach (@out) {
-            my @line = split(' ', $_);   
-            print pop(@line);
-            print "\n";
+        open STDERR, ">&", $oldout;
+        if($ssh->error) {
+            print color("red");
+            print "You haven't publish a version!\n";
+            print color("reset");
         }
+        print color("yellow");
+        print "@out";
         print color("reset");
+        #only get version from one server
         exit;
     }
 }
@@ -96,13 +101,16 @@ sub change_version {
         my $version_file = $confs{ "$project_name" }->{"version_file"};
         my $ssh = Net::OpenSSH->new($host, %params);
         my $cmd = "echo $new_version > $version_file";
+        open my $oldout, ">&", \*STDERR or die "error";
+        open STDERR, '>', '/dev/null' or die "error";
         my $out = $ssh->capture( $cmd );
-        if($out == 0) {
-            print color("green");
-            print "$host Change Version to $new_version Successful.";
-        } else {
+        open STDERR, ">&", $oldout;
+        if($ssh->error) {
             print color("red");
-            print "$host Change Version to $new_version Failed!";
+            print "$host Change Version to $new_version Failed!\n";
+        } else {
+            print color("green");
+            print "$host Change Version to $new_version Successful.\n";
         }
     }
     print color("reset");
@@ -139,7 +147,7 @@ sub publish_version {
         my $dir = $confs{ "$project_name" }->{"dest_dir"};
         &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
         open my $oldout, ">&", \*STDOUT or die "error";
-        open STDOUT, '>', '/tmp/out.txt' or die "error";
+        open STDOUT, '>', '/dev/null' or die "error";
         my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version."/");
         my $out = system(@args);
         open STDOUT, ">&", $oldout;
@@ -283,7 +291,7 @@ sub all_versions_exist_check {
     my $dest_dir = $confs{ "$project_name" }->{ "dest_dir" };
     foreach(@{$servers{ "$project_name" }}) {
         my $host = $_->{ "host" };
-        my $res = &server_version_exist_check($project_name, $host, $version);
+        my $res = &server_version_check($project_name, $host, $version);
         if(not defined $res) {
             print color("red");
             print "$host does not exist version: $version. Please check.\n";
@@ -308,7 +316,10 @@ sub server_version_check {
     );
     my $ssh = Net::OpenSSH->new($host, %params);
     my $cmd = "ls $dest_dir"."/".$version;
+    open my $oldout, ">&", \*STDOUT or die "error";
+    open STDOUT, '>', '/dev/null' or die "error";
     my $res = $ssh->system($cmd);
+    open STDOUT, ">&", $oldout;
     return $res;
 }
 

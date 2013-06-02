@@ -4,7 +4,7 @@ project {
     source_dir /tmp/demo;
     dest_dir /home/bj/www/demo/versions;
     server {
-        host 172.13.1.10;
+        host joinjoy.me;
         user bj;
     }
 }
