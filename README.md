@@ -29,6 +29,7 @@ project {
     name demo;
     version_file /home/www/RELEASE/demo;
     source_dir /tmp/demo;
+    git_address git@github.com:baijian/iPublish.git
     dest_dir /home/www/projects/demo;
     server {
         host joinjoy.me;
@@ -44,6 +45,7 @@ project {
     name demo2;
     version_file /home/www/RELEASE/demo2;
     source_dir /tmp/demo2;
+    git_address git@github.com:baijian/iPublish.git
     dest_dir /home/www/projects/demo2;
     server {
         host joinjoy.me;
@@ -97,6 +99,7 @@ iPublish [-p | --project] <name> [-cv] <version>
 $conf{"project_name"}{"name"} = "demo";
 $conf{"project_name"}{"version_file"} = "/home/www/RELEASE/DEMO";
 $conf{"project_name"}{"source_dir"} = "";
+$conf{"project_name"}{"git_address"} = "git@github.com:baijian/iPublish.git";
 $conf{"project_name"}{"dest_dir"} = "";
 ```
 

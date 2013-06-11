@@ -2,6 +2,7 @@ project {
     name demo;
     version_file /home/bj/www/release/DEMO;
     source_dir /tmp/demo;
+    git_address git@github.com:baijian/iPublish.git;
     dest_dir /home/bj/www/demo/versions;
     server {
         host joinjoy.me;
@@ -12,6 +13,7 @@ project {
     name demo2;
     version_file /home/www/release/DEMO2;
     source_dir /tmp/demo2;
+    git_address git@github.com:baijian/iPublish.git;
     dest_dir /home/www/projects/demo2;
     server {
         host joinjoy.me;
