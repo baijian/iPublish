@@ -143,14 +143,25 @@ sub publish_version {
         my %params = (
             user => $_->{ "user" }
         );
-        my $source_dir = $confs{"$project_name"}->{ "source_dir" };
-        my $dir = $confs{ "$project_name" }->{"dest_dir"};
-        &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
-        open my $oldout, ">&", \*STDOUT or die "error";
-        open STDOUT, '>', '/dev/null' or die "error";
-        my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version."/");
-        my $out = system(@args);
-        open STDOUT, ">&", $oldout;
+        my $out = undef;
+        if(defined $confs{ "$project_name" }->{ "git_address" }) {
+            my $git_address = $confs{ "$project_name" }->{ "git_address" };
+            my $dir = $confs{ "$project_name" }->{"dest_dir"};
+            &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
+            my $ssh = &connect_server($host, $user);
+            my @args = ("git", "clone", "$git_address", "$dir"."/".$version);
+            $out = $ssh->system(@args);
+        } else {
+            my $source_dir = $confs{"$project_name"}->{ "source_dir" };
+            my $dir = $confs{ "$project_name" }->{"dest_dir"};
+            &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
+            open my $oldout, ">&", \*STDOUT or die "error";
+            open STDOUT, '>', '/dev/null' or die "error";
+            my @args = ("scp", "-r", "$source_dir", $uhost.$dir."/".$version."/");
+            $out = system(@args);
+            open STDOUT, ">&", $oldout;
+            
+        }
         if ($out == 0) {
             print color("green");
             print $host." publish successful.\n";
