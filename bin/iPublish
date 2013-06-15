@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 use warnings;
+
 # for my develop environment on mac => egg ache
 BEGIN {
     push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
@@ -16,7 +17,9 @@ my $num = scalar(@ARGV);
 
 #command params selection and handle
 if($num == 1) {
-    if($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
+    if($ARGV[0] eq "-ml") {
+        &modules_list;
+    } elsif($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
         #list all projects' conf
         &list_projects;
     } else {
@@ -213,7 +216,7 @@ sub list_versions {
 }
 
 sub load_conf {
-    if(open(CONF, ".iPublish")) {
+    if(open(CONF, "$ENV{'HOME'}/.iPublish")) {
         #begin to parser conf
         my $mutex = -1;
         my $project_name;
@@ -384,4 +387,15 @@ sub show_help {
     print "\t[-p | --project] <name> [-v | --version] <version> : publish a project of a 
         \t\t certain version\n";
     print "\t[-p | --project] <name> -cv <version> : change to new version\n";
+}
+
+sub modules_list {
+    use ExtUtils::Installed;
+    my $inst = ExtUtils::Installed->new();
+    my @modules = $inst->modules();
+
+    foreach(@modules){
+        my $ver = $inst->version($_) || "No Version";
+        printf("%s=>(%s)\n", $_, $ver);
+    }
 }
