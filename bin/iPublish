@@ -152,8 +152,16 @@ sub publish_version {
             my $dir = $confs{ "$project_name" }->{"dest_dir"};
             &add_server_version($project_name, $host, $_->{ "user" }, $dir, $version);
             my $ssh = &connect_server($host, $user);
-            my @args = ("git", "clone", "$git_address", "$dir"."/".$version);
+            my @args = ("type", "git");
             $out = $ssh->system(@args);
+            if($out == 0) {
+                my @args = ("git", "clone", "$git_address", "$dir"."/".$version);
+                $out = $ssh->system(@args);
+            } else {
+                print color("red");
+                print $host." has not install git yet!\n";
+                print color("reset");
+            }
         } else {
             my $source_dir = $confs{"$project_name"}->{ "source_dir" };
             my $dir = $confs{ "$project_name" }->{"dest_dir"};
