@@ -155,8 +155,27 @@ sub publish_version {
             my @args = ("type", "git");
             $out = $ssh->system(@args);
             if($out == 0) {
-                my @args = ("git", "clone", "$git_address", "$dir"."/".$version);
+                @args = ("ls", "$dir"."/".$version);
                 $out = $ssh->system(@args);
+                if($out == 0) {
+                    my $p = "Please input y or n %d> ";
+                    printf( $p, 0 );    
+                    while( <> ) {
+                        do {
+                            @args = ("git", "clone", "$git_address", "$dir"."/".$version);    
+                            $out = $ssh->system(@args);
+                            last;
+                        } if m/y/i;
+                        do {
+                            $out = 201;
+                            last;
+                        } if m/n/i;
+                        printf( $p, $. );
+                    }
+                } else {
+                    @args = ("git", "clone", "$git_address", "$dir"."/".$version);
+                    $out = $ssh->system(@args);
+                }
             } else {
                 print color("red");
                 print $host." has not install git yet!\n";
@@ -173,7 +192,10 @@ sub publish_version {
             open STDOUT, ">&", $oldout;
             
         }
-        if ($out == 0) {
+        if($out == 201) {
+            print color("yellow");
+            print $host." has haved the version $version, and you choose not cover!";
+        }elsif($out == 0) {
             print color("green");
             print $host." publish successful.\n";
         } else {
@@ -194,6 +216,9 @@ sub add_server_version {
 sub connect_server {
     my ($host, $user) = @_;
     my $ssh = Net::OpenSSH->new($host, (user=>$user));
+    print color("red");
+    $ssh->error and die "Couldn't establish SSH connection: ". $ssh->error;
+    print color("reset");
     return $ssh;
 }
 
