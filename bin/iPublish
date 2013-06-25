@@ -267,7 +267,7 @@ sub load_conf {
             } elsif(m/\s*version_file\s*((\/\w+)+);\s*/ && $mutex == 0) {
                 #version file location 
                 $confs{"$project_name"}{"version_file"} = $1;
-            } elsif(m/\s*source_dir\s*((\/\w+)+);\s*/ && $mutex == 0) {
+            } elsif(m/\s*source_dir\s*((\/(.?\w+)+)+);\s*/ && $mutex == 0) {
                 #source dir $1
                 $confs{"$project_name"}{ "source_dir" } = $1; 
             } elsif(m/\s*git_address\s*(\w+\@\w+(\.\w+)+:\w+\/\w+(\.git)?);\s*/ && $mutex == 0) {
