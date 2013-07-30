@@ -1,11 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 use strict;
 use warnings;
 
-# for my develop environment on mac => egg ache
-BEGIN {
-    push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
-}
+## for my develop environment on mac => egg ache
+#BEGIN {
+#    push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
+#}
 use Net::OpenSSH;
 use Term::ANSIColor;
 
