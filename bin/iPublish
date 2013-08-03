@@ -2,12 +2,18 @@
 use strict;
 use warnings;
 
-## for my develop environment on mac => egg ache
-#BEGIN {
-#    push @INC, '/opt/local/lib/perl5/site_perl/5.12.4';
-#}
 use Net::OpenSSH;
 use Term::ANSIColor;
+use Getopt:Long;
+
+my $help;
+my $listall_of_projects;
+my $listinfo_of_project;
+my $list_versions_of_project;
+my $list_current_version_of_project;
+my $publish_project;
+my $switch_project;
+my $version;
 
 my %confs;
 my %servers;
@@ -15,51 +21,42 @@ my %versions;
 my @errmsg;
 my $num = scalar(@ARGV);
 
-#command params selection and handle
-if($num == 1) {
-    if($ARGV[0] eq "-ml") {
-        &modules_list;
-    } elsif($ARGV[0] eq "-l" || $ARGV[0] eq "--list"){
-        #list all projects' conf
+&init;
+
+sub init {
+    GetOptions(
+        'help|h!' => \$help,
+        'listall|all!' => \$listall_of_projects, 
+        'list|l=s' => \$listinfo_of_project,
+        'listversions|lvs=s' => \$list_versions_of_project,
+        'listversion|lv=s' => \$list_current_version_of_project,
+        'publish|pub=s' => \$publish_project,
+        'switch|sw=s' => \$switch_project,
+        'version|v=s' => \$version,
+    );
+    if ($help) {
+        &help_info;
+    } elsif ($listall_of_projects) {
+        #list all projects' info
         &list_projects;
-    } else {
-        &show_help;
-    }
-} elsif($num == 3) {
-    if( ($ARGV[0] eq "-l" || $ARGV[0] eq "--list")
-            && ($ARGV[1] eq "-p" || $ARGV[1] eq "--project") ) 
-    {
+    } elsif ($listinfo_of_project) {
         #list conf of one project
-        &list_projects($ARGV[2]);
-    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
-            && ($ARGV[2] eq "-l" || $ARGV[2] eq "--list") )
-    {
+        &list_projects($listinfo_of_project);
+    } elsif ($list_versions_of_project) {
         #list project's all versions
-        &list_versions($ARGV[1]);
-    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project")
-            && ($ARGV[2] eq "-cv") ) 
-    {
+        &list_versions($list_versions_of_project);
+    } elsif ($list_current_version_of_project) {
         #list project's current version
-        &current_version($ARGV[1]);
-    } else {
-        &show_help;
-    }
-} elsif($num == 4) {
-    if( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
-            && ($ARGV[2] eq "-v" || $ARGV[2] eq "--version") )
-    {
+        &current_version($list_current_version_of_project);
+    } elsif ($publish_project and $version) {
         #publish a new version for a project
-        &publish_version($ARGV[1], $ARGV[3]);
-    } elsif( ($ARGV[0] eq "-p" || $ARGV[0] eq "--project") 
-            && ($ARGV[2] eq "-cv") ) 
-    {
+        &publish_version($publish_project, $version);
+    } elsif ($switch_project and $version) {
         #convert into a new version for a project
-        &change_version($ARGV[1], $ARGV[3]);
+        &change_version($switch_project, $version);
     } else {
-        &show_help;
+        &help_info;
     }
-} else {
-    &show_help;
 }
 
 sub current_version {
@@ -410,16 +407,15 @@ sub list_projects {
     }
 }
 
-sub show_help {
-    print "Usage : iPublish\n";
-    print "\t[-h | --help] : show help info\n";
-    print "\t[-l | --list] : show all projects you have add to iPublish\n";
-    print "\t[-l | --list] [-p | --project] <name> : show config info of one project\n";
-    print "\t[-p | --project] <name> [-l | --list] : list all versions of your project\n";
-    print "\t[-p | --project] <name> -cv : show current version of your project\n";
-    print "\t[-p | --project] <name> [-v | --version] <version> : publish a project of a 
-        \t\t certain version\n";
-    print "\t[-p | --project] <name> -cv <version> : change to new version\n";
+sub help_info {
+    print "Usage: iPublish [options...] <value>\n";
+    print "[-h | --help] : show help info\n";
+    print "[-all | --listall] : show all projects you have added to iPublish\n";
+    print "[-l | --list] <name> : show project info of <name>\n";
+    print "[-lvs | --listversions] <name> : list all versions of <name> project\n";
+    print "[-lv | --listversion] <name> : show current version of <name> project\n";
+    print "[-pub | --publish] <name> [-v | --version] <version>\n";
+    print "[-sw | --switch] <name> [-v | --version] <version>\n";
 }
 
 sub modules_list {
