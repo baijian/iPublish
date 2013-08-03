@@ -4,7 +4,7 @@ use warnings;
 
 use Net::OpenSSH;
 use Term::ANSIColor;
-use Getopt:Long;
+use Getopt::Long;
 
 my $help;
 my $listall_of_projects;
