@@ -65,39 +65,11 @@ project {
 ```
 
 ## Command help
+
 Show help info 
+
 ```text
 iPublish [-h | --help]
-```
-
-List config info of all projects that you have added to iPublish
-```text
-iPublish [-l | --list]
-```
-
-List config info of one project passed by you
-```text
-iPublish [-l | --list] [-p | --project] <name>
-```
-   
-List all versions of a project
-```text
-iPublish [-p | --project] <name> [-l | --list]
-``` 
-
-Query current version of a project
-```text
-iPublish [-p | --project] <name> [-cv]
-```
-
-Publish a project 
-```text
-iPublish [-p | --project] <name> [-v | --version] <version>
-```
-
-Change to a new version of a project
-```text
-iPublish [-p | --project] <name> [-cv] <version>
 ```
 
 ## Others
