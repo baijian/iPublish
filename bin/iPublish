@@ -17,9 +17,7 @@ my $version;
 
 my %confs;
 my %servers;
-my %versions;
 my @errmsg;
-my $num = scalar(@ARGV);
 
 &init;
 
