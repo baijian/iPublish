@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Module-IPublish.t
+lib/Module/IPublish.pm
