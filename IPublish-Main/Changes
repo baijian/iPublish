@@ -1,0 +1,6 @@
+Revision history for Perl extension IPublish::Main.
+
+0.01  Sat Aug 24 14:51:28 2013
+	- original version; created by h2xs 1.23 with options
+		-AXc -n IPublish::Main
+
