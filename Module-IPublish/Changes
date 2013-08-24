@@ -1,6 +1,0 @@
-Revision history for Perl extension Module::IPublish.
-
-0.01  Wed Aug 14 23:40:43 2013
-	- original version; created by h2xs 1.23 with options
-		-XA -n Module::IPublish
-
